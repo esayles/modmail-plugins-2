@@ -150,7 +150,7 @@ class TagsPlugin(commands.Cog):
 
     @commands.command()
     async def tag(self, ctx: commands.Context, name: str):
-        embed = discord.Embed()
+        
         """
         Use a tag!
         """
@@ -169,14 +169,16 @@ class TagsPlugin(commands.Cog):
     async def on_message(self, msg: discord.Message):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
+        
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
-        embed = discord.Embed(title=tag["name"], description=tag["content"])
-        tag = await self.db.find_one({"name": names[0]})
 
+        tag = await self.db.find_one({"name": names[0]})
+        embed = discord.Embed(title=tag["name"], description=tag["content"])
         if tag is None:
             return
         else:
+            await msg.channel.send(tag["content"])
             await msg.channel.send(embed=embed)
             await self.db.find_one_and_update(
                 {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
