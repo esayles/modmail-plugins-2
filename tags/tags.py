@@ -24,9 +24,18 @@ class TagsPlugin(commands.Cog):
 
     @tags.command()
     async def add(self, ctx: commands.Context, name: str, *, content: str):
-        """
-        Make a new tag
-        """
+        embed = discord.embed(
+            title = f'{name}'
+            description = ''
+        )
+        
+        if message.startswith('https://') or message.startswith('http://'):
+            # message is a URL
+            if message.startswith('https://hasteb.in/'):
+                message = 'https://hasteb.in/raw/' + message.split('/')[-1]
+
+            async with self.bot.session.get(message) as resp:
+                message = await resp.text()
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
             return
@@ -52,7 +61,6 @@ class TagsPlugin(commands.Cog):
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
         Edit an existing tag
-
         Only owner of tag or user with Manage Server permissions can use this command
         """
         tag = await self.find_db(name=name)
@@ -78,7 +86,6 @@ class TagsPlugin(commands.Cog):
     async def delete(self, ctx: commands.Context, name: str):
         """
         Delete a tag.
-
         Only owner of tag or user with Manage Server permissions can use this command
         """
         tag = await self.find_db(name=name)
@@ -150,7 +157,6 @@ class TagsPlugin(commands.Cog):
 
     @commands.command()
     async def tag(self, ctx: commands.Context, name: str):
-        embed = discord.Embed()
         """
         Use a tag!
         """
@@ -171,13 +177,14 @@ class TagsPlugin(commands.Cog):
             return
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
+        embed = discord.Embed(title=tag["name"], description=tag["content"])
 
         tag = await self.db.find_one({"name": names[0]})
 
         if tag is None:
             return
         else:
-            await msg.channel.send(tag["content"])
+            await msg.channel.send(embed=embed)
             await self.db.find_one_and_update(
                 {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
             )
@@ -185,6 +192,7 @@ class TagsPlugin(commands.Cog):
 
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
-    
+
+
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
