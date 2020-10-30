@@ -24,11 +24,9 @@ class TagsPlugin(commands.Cog):
 
     @tags.command()
     async def add(self, ctx: commands.Context, name: str, *, content: str):
-        embed = discord.embed(
-            title = f'{name}'
-            description = ''
-        )
-        
+        """
+        Make a new tag
+        """
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
             return
@@ -54,6 +52,7 @@ class TagsPlugin(commands.Cog):
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
         Edit an existing tag
+
         Only owner of tag or user with Manage Server permissions can use this command
         """
         tag = await self.find_db(name=name)
@@ -79,6 +78,7 @@ class TagsPlugin(commands.Cog):
     async def delete(self, ctx: commands.Context, name: str):
         """
         Delete a tag.
+
         Only owner of tag or user with Manage Server permissions can use this command
         """
         tag = await self.find_db(name=name)
@@ -150,6 +150,7 @@ class TagsPlugin(commands.Cog):
 
     @commands.command()
     async def tag(self, ctx: commands.Context, name: str):
+        embed = discord.Embed()
         """
         Use a tag!
         """
@@ -171,7 +172,6 @@ class TagsPlugin(commands.Cog):
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
         embed = discord.Embed(title=tag["name"], description=tag["content"])
-
         tag = await self.db.find_one({"name": names[0]})
 
         if tag is None:
@@ -185,7 +185,6 @@ class TagsPlugin(commands.Cog):
 
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
-
-
+    
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
