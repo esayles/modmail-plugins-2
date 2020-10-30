@@ -5,6 +5,7 @@ from discord.ext import commands
 
 from core import checks
 from core.models import PermissionLevel
+from .models import apply_vars, SafeString
 
 
 class TagsPlugin(commands.Cog):
@@ -184,6 +185,15 @@ class TagsPlugin(commands.Cog):
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
 
+    @commands.command()
+     async def send(self, ctx, channel: discord.TextChannel, *, message):
+          if message.startswith('https://') or message.startswith('http://'):
+            # message is a URL
+            if message.startswith('https://hasteb.in/'):
+                message = 'https://hasteb.in/raw/' + message.split('/')[-1]
+
+            async with self.bot.session.get(message) as resp:
+                message = await resp.text()
 
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
