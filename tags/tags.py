@@ -150,6 +150,7 @@ class TagsPlugin(commands.Cog):
 
     @commands.command()
     async def tag(self, ctx: commands.Context, name: str):
+        embed = discord.Embed()
         """
         Use a tag!
         """
