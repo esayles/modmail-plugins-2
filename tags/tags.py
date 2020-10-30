@@ -12,7 +12,7 @@ class TagsPlugin(commands.Cog):
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
 
-    def apply_vars_dict(self, member, message, invite):
+    def apply_vars_dict(self, ctx: commands.Context, name: str, *, content: str):
         for k, v in message.items():
             if isinstance(v, dict):
                 message[k] = self.apply_vars_dict(member, v, invite)
@@ -24,16 +24,16 @@ class TagsPlugin(commands.Cog):
                 message[k] = v[:-1]
         return message
 
-    def format_message(self, member, message, invite):
+    def format_message(self, ctx: commands.Context, name: str, *, content: str):
         try:
             message = json.loads(message)
         except json.JSONDecodeError:
             # message is not embed
-            message = apply_vars(self, member, message, invite)
+            message = apply_vars(self, ctx: commands.Context, name: str, *, content: str)
             message = {'content': message}
         else:
             # message is embed
-            message = self.apply_vars_dict(member, message, invite)
+            message = self.apply_vars_dict(self, ctx: commands.Context, name: str, *, content: str)
 
             if any(i in message for i in ('embed', 'content')):
                 message['embed'] = discord.Embed.from_dict(message['embed'])
