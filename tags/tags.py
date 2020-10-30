@@ -200,13 +200,13 @@ class TagsPlugin(commands.Cog):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
             
-        if message.startswith('https://') or message.startswith('http://'):
-            # message is a URL
-            if message.startswith('https://hasteb.in/'):
-                message = 'https://hasteb.in/raw/' + message.split('/')[-1]
+            if message.startswith('https://') or message.startswith('http://'):
+                # message is a URL
+                if message.startswith('https://hasteb.in/'):
+                    message = 'https://hasteb.in/raw/' + message.split('/')[-1]
 
-            async with self.bot.session.get(message) as resp:
-                message = await resp.text()
+                async with self.bot.session.get(message) as resp:
+                    message = await resp.text()
         
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
