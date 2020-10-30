@@ -1,3 +1,5 @@
+import json
+
 import discord
 from datetime import datetime
 from discord.ext import commands
@@ -202,7 +204,7 @@ class TagsPlugin(commands.Cog):
         names = content.split(" ")
 
         tag = await self.db.find_one({"name": names[0]})
-        embed = discord.Embed(title=tag["name"], description=tag[embed])
+        embed = discord.Embed(title=tag["name"], description=tag[description])
         if tag is None:
             return
         else:
