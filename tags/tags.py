@@ -199,14 +199,6 @@ class TagsPlugin(commands.Cog):
     async def on_message(self, msg: discord.Message):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
-            
-            if message.startswith('https://') or message.startswith('http://'):
-                # message is a URL
-                if message.startswith('https://hasteb.in/'):
-                    message = 'https://hasteb.in/raw/' + message.split('/')[-1]
-
-                async with self.bot.session.get(message) as resp:
-                    message = await resp.text()
         
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
@@ -215,6 +207,14 @@ class TagsPlugin(commands.Cog):
         embed = discord.Embed(title=tag["name"], description=tag["content"])
         if tag is None:
             return
+
+        if message.startswith('https://') or message.startswith('http://'):
+                # message is a URL
+            if message.startswith('https://hasteb.in/'):
+                 message = 'https://hasteb.in/raw/' + message.split('/')[-1]
+
+            async with self.bot.session.get(message) as resp:
+                 message = await resp.text()
         else:
             await msg.channel.send(tag["content"])
             await msg.channel.send(embed=embed)
