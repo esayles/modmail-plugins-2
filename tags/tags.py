@@ -200,7 +200,7 @@ class TagsPlugin(commands.Cog):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
         
-        content = msg.content.replace(self.bot.prefix, "")
+        content = msg.content.replace(self.bot.prefix, "", embed)
         names = content.split(" ")
 
         tag = await self.db.find_one({"name": names[0]})
