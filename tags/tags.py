@@ -208,7 +208,7 @@ class TagsPlugin(commands.Cog):
         if tag is None:
             return
         else:
-
+            
             await msg.channel.send(embed=embed)
             await self.db.find_one_and_update(
                 {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
