@@ -200,7 +200,8 @@ class TagsPlugin(commands.Cog):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
         
-
+        content = msg.content.replace(self.bot.prefix, "")
+        names = content.split(" ")
 
         tag = await self.db.find_one({"name": names[0]})
         embed = discord.Embed(title=tag["name"], description=tag["content"])
@@ -208,6 +209,8 @@ class TagsPlugin(commands.Cog):
             return
         else:
             
+            thing = json.loads(tag["content"])
+            embed = discord.Embed.from_dict(thing['embed'])
             await msg.channel.send(embed=embed)
             await self.db.find_one_and_update(
                 {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
