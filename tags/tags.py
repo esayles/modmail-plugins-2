@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from core import checks
 from core.models import PermissionLevel
+from .models import apply_vars, SafeString
 
 
 class TagsPlugin(commands.Cog):
@@ -11,6 +12,35 @@ class TagsPlugin(commands.Cog):
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
 
+    def apply_vars_dict(self, member, message, invite):
+        for k, v in message.items():
+            if isinstance(v, dict):
+                message[k] = self.apply_vars_dict(member, v, invite)
+            elif isinstance(v, str):
+                message[k] = apply_vars(self, member, v, invite)
+            elif isinstance(v, list):
+                message[k] = [self.apply_vars_dict(member, _v, invite) for _v in v]
+            if k == 'timestamp':
+                message[k] = v[:-1]
+        return message
+
+    def format_message(self, member, message, invite):
+        try:
+            message = json.loads(message)
+        except json.JSONDecodeError:
+            # message is not embed
+            message = apply_vars(self, member, message, invite)
+            message = {'content': message}
+        else:
+            # message is embed
+            message = self.apply_vars_dict(member, message, invite)
+
+            if any(i in message for i in ('embed', 'content')):
+                message['embed'] = discord.Embed.from_dict(message['embed'])
+            else:
+                message = None
+        return message
+        
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @checks.has_permissions(PermissionLevel.REGULAR)
@@ -148,6 +178,7 @@ class TagsPlugin(commands.Cog):
 
     @commands.command()
     async def tag(self, ctx: commands.Context, name: str):
+        
         """
         Use a tag!
         """
@@ -166,15 +197,17 @@ class TagsPlugin(commands.Cog):
     async def on_message(self, msg: discord.Message):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
+        
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
 
         tag = await self.db.find_one({"name": names[0]})
-
+        embed = discord.Embed(title=tag["name"], description=tag[embed])
         if tag is None:
             return
         else:
-            await msg.channel.send(tag["content"])
+
+            await msg.channel.send(embed=embed)
             await self.db.find_one_and_update(
                 {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
             )
@@ -182,7 +215,6 @@ class TagsPlugin(commands.Cog):
 
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
-
-
+    
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
