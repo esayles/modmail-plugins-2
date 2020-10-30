@@ -204,7 +204,7 @@ class TagsPlugin(commands.Cog):
         names = content.split(" ")
 
         tag = await self.db.find_one({"name": names[0]})
-        embed = discord.Embed(title=tag["name"], description=tag[description])
+        embed = discord.Embed(title=tag["name"], description=tag["content"])
         if tag is None:
             return
         else:
