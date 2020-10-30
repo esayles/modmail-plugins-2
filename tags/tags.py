@@ -199,23 +199,8 @@ class TagsPlugin(commands.Cog):
     async def on_message(self, msg: discord.Message):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
-        if message.startswith('https://') or message.startswith('http://'):
-            # message is a URL
-            if message.startswith('https://hasteb.in/'):
-                message = 'https://hasteb.in/raw/' + message.split('/')[-1]
+        
 
-            async with self.bot.session.get(message) as resp:
-                message = await resp.text()
-formatted_message = self.format_message(ctx.author, message, SafeString('{invite}'))
-        if formatted_message:
-            await channel.send(**formatted_message)
-            await self.db.find_one_and_update(
-                {'_id': 'config'},
-                {'$set': {'welcomer': {'channel': str(channel.id), 'message': message}}},
-                upsert=True
-            )
-        content = msg.content.replace(self.bot.prefix, "", embed)
-        names = content.split(" ")
 
         tag = await self.db.find_one({"name": names[0]})
         embed = discord.Embed(title=tag["name"], description=tag["content"])
