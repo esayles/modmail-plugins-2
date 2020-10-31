@@ -82,7 +82,6 @@ class TagsPlugin(commands.Cog):
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
         Edit an existing tag
-
         Only owner of tag or user with Manage Server permissions can use this command
         """
         tag = await self.find_db(name=name)
@@ -108,7 +107,6 @@ class TagsPlugin(commands.Cog):
     async def delete(self, ctx: commands.Context, name: str):
         """
         Delete a tag.
-
         Only owner of tag or user with Manage Server permissions can use this command
         """
         tag = await self.find_db(name=name)
@@ -207,8 +205,10 @@ class TagsPlugin(commands.Cog):
         thing = json.loads(tag["content"])
         embed = discord.Embed.from_dict(thing['embed'])
         if tag is None:
-       
+            return
         else:
+            
+            
             
             await msg.channel.send(embed=embed)
             await self.db.find_one_and_update(
