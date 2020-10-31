@@ -206,6 +206,7 @@ class TagsPlugin(commands.Cog):
 
             async with self.bot.session.get(message) as resp:
                 message = await resp.text()
+                return
         if formatted_message:
             await channel.send(**formatted_message)
             await self.db.find_one_and_update(
