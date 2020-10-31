@@ -199,14 +199,6 @@ class TagsPlugin(commands.Cog):
         if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
             return
         
-        if msg.content.startswith('https://') or msg.content.startswith('http://'):
-            # message is a URL
-            if msg.content.startswith('https://hasteb.in/'):
-                message = 'https://hasteb.in/raw/' + message.split('/')[-1]
-
-            async with self.bot.session.get(message) as resp:
-                message = await resp.text()
-                return
         if formatted_message:
             await channel.send(**formatted_message)
             await self.db.find_one_and_update(
@@ -229,7 +221,7 @@ class TagsPlugin(commands.Cog):
             await self.db.find_one_and_update(
                 {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
             )
-            
+            return
 
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
