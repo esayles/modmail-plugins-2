@@ -210,7 +210,9 @@ class TagsPlugin(commands.Cog):
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
 
-       
+        tag = await self.db.find_one({"name": names[0]})
+        thing = json.loads(tag["content"])
+        embed = discord.Embed.from_dict(thing['embed'])
         if tag is None:
             return
         else:
