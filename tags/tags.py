@@ -211,12 +211,10 @@ class TagsPlugin(commands.Cog):
            await channel.send(**formatted_message)
            await self.db.find_one_and_update(
                 {'_id': 'config'},
-                {'$set': {'welcomer': {'channel': str(channel.id), 'message': message}}},
+                {'$set': {'tag': {'channel': str(channel.id), 'message': message}}},
                 upsert=True
             )
         else:
-            
-            
             
             await msg.channel.send(embed=embed)
             await self.db.find_one_and_update(
