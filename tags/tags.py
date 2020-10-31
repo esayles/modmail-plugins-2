@@ -207,13 +207,7 @@ class TagsPlugin(commands.Cog):
         thing = json.loads(tag["content"])
         embed = discord.Embed.from_dict(thing['embed'])
         if tag is None:
-        if formatted_message:
-           await channel.send(**formatted_message)
-           await self.db.find_one_and_update(
-                {'_id': 'config'},
-                {'$set': {'tag': {'channel': str(channel.id), 'message': message}}},
-                upsert=True
-            )
+       
         else:
             
             await msg.channel.send(embed=embed)
