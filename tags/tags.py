@@ -207,10 +207,10 @@ class TagsPlugin(commands.Cog):
                 upsert=True
             )  
             return
+        
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
 
-       
         if tag is None:
             return
         else:
