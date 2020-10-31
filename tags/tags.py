@@ -195,16 +195,18 @@ class TagsPlugin(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, msg: discord.Message):
+
+        if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
+            return
+        
         if formatted_message:
             await channel.send(**formatted_message)
             await self.db.find_one_and_update(
                 {'_id': 'config'},
                 {'$set': {'tags': {'channel': str(channel.id), 'message': message}}},
                 upsert=True
-            )
-        if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
+            )  
             return
-        
         content = msg.content.replace(self.bot.prefix, "")
         names = content.split(" ")
 
