@@ -7,9 +7,10 @@ from ext.command import group
 from ext.utils import apply_vars
 
 
-class Tags(commands.Cog):
+class TagsPlugin(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: discord.Client = bot
+        self.db = bot.plugin_db.get_partition(self)
 
     @group(6, invoke_without_command=True)
     async def tag(self, ctx):
