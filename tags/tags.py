@@ -4,8 +4,8 @@ from discord.ext import commands
 
 from core import checks
 from core.models import PermissionLevel
-from tagss.command import group
-from tagss.utils import apply_vars
+from core.command import group
+from core.utils import apply_vars
 
 
 class TagsPlugin(commands.Cog):
