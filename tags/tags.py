@@ -78,16 +78,7 @@ class TagsPlugin(commands.Cog):
             )
             return
         
-   @tag.command(6, name='list')
-    async def list_(self, ctx):
-        """Lists all tags"""
-        guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-        tags = [i.name for i in guild_config.tags]
 
-        if tags:
-            await ctx.send('Tags: ' + ', '.join(tags))
-        else:
-            await ctx.send('No tags saved')
 
 
     @tags.command()
@@ -187,7 +178,18 @@ class TagsPlugin(commands.Cog):
             embed.add_field(name="Uses", value=tag["uses"], inline=False)
             await ctx.send(embed=embed)
             return
+        
+     @tag.command(6, name='list')
+    async def list_(self, ctx):
+        """Lists all tags"""
+        guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
+        tags = [i.name for i in guild_config.tags]
 
+        if tags:
+            await ctx.send('Tags: ' + ', '.join(tags))
+        else:
+            await ctx.send('No tags saved')
+            
     @commands.command()
     async def tag(self, ctx: commands.Context, name: str):
         
