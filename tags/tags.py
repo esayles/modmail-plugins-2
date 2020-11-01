@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from core import checks
 from core.models import PermissionLevel
-from models import apply_vars
+from core.models import apply_vars
 
 
 class TagsPlugin(commands.Cog):
