@@ -15,7 +15,7 @@ class TagsPlugin(commands.Cog):
         self.db = bot.plugin_db.get_partition(self)
 
     @tags.command()
-    async def add(self, ctx, name, *, value: commands.clean_content=None):
+    async def create(self, ctx, name, *, value: commands.clean_content=None):
         """
         Make a new tag
         """
