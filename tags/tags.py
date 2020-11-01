@@ -1,21 +1,29 @@
-import json
-
 import discord
 from datetime import datetime
 from discord.ext import commands
 
 from core import checks
 from core.models import PermissionLevel
-from core.models import apply_vars
+from ext.command import group
+from ext.utils import apply_vars
 
 
 class TagsPlugin(commands.Cog):
     def __init__(self, bot):
         self.bot: discord.Client = bot
-        self.db = bot.plugin_db.get_partition(self)
+        self.coll = bot.plugin_db.get_partition(self)
+
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    @checks.has_permissions(PermissionLevel.REGULAR)
+    async def tags(self, ctx: commands.Context):
+        """
+        Create Edit & Manage Tags
+        """
+        await ctx.send_help(ctx.command)
 
     @tags.command()
-    async def add(self, ctx, name, *, value: commands.clean_content=None):
+    async def add(self, ctx: commands.Context, name: str, *, content: str):
         """
         Make a new tag
         """
@@ -25,12 +33,28 @@ class TagsPlugin(commands.Cog):
 
             async with self.bot.session.get(value) as resp:
                 value = await resp.text()
-
+                
         if name in [i.qualified_name for i in self.bot.commands]:
             await ctx.send('Name is already a pre-existing bot command')
         else:
             await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
             await ctx.send(self.bot.accept)
+        else:
+            ctx.message.content = content
+            await self.db.insert_one(
+                {
+                    "name": name,
+                    "content": ctx.message.clean_content,
+                    "createdAt": datetime.utcnow(),
+                    "updatedAt": datetime.utcnow(),
+                    "author": ctx.author.id,
+                    "uses": 0,
+                }
+            )
+
+            await ctx.send(
+                f":white_check_mark: | Tag with name `{name}` has been successfully created!"
+            )
             return
 
     @tags.command()
@@ -133,7 +157,6 @@ class TagsPlugin(commands.Cog):
 
     @commands.command()
     async def tag(self, ctx: commands.Context, name: str):
-        
         """
         Use a tag!
         """
@@ -149,44 +172,26 @@ class TagsPlugin(commands.Cog):
             return
 
     @commands.Cog.listener()
-    async def on_message(self, message):
-        if not message.author.bot and message.guild:
-            ctx = await self.bot.get_context(message)
-            guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-            tags = [i.name for i in guild_config.tags]
+    async def on_message(self, msg: discord.Message):
+        if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
+            return
+        content = msg.content.replace(self.bot.prefix, "")
+        names = content.split(" ")
 
-            if ctx.invoked_with in tags:
-                tag = guild_config.tags.get_kv('name', ctx.invoked_with)
-                await ctx.send(**self.format_message(tag.value, message))
+        tag = await self.db.find_one({"name": names[0]})
 
-    def apply_vars_dict(self, tag, message):
-        for k, v in tag.items():
-            if isinstance(v, dict):
-                tag[k] = self.apply_vars_dict(v, message)
-            elif isinstance(v, str):
-                tag[k] = apply_vars(self, v, message)
-            elif isinstance(v, list):
-                tag[k] = [self.apply_vars_dict(_v, message) for _v in v]
-            if k == 'timestamp':
-                tag[k] = v[:-1]
-        return tag
-
-    def format_message(self, tag, message):
-        try:
-            tag = json.loads(tag)
-        except json.JSONDecodeError:
-            # message is not embed
-            tag = apply_vars(self, tag, message)
-            tag = {'content': tag}
+        if tag is None:
+            return
         else:
-            # message is embed
-            tag = self.apply_vars_dict(tag, message)
+            await msg.channel.send(tag["content"])
+            await self.db.find_one_and_update(
+                {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
+            )
+            return
 
-            if any(i in message for i in ('embed', 'content')):
-                tag['embed'] = discord.Embed.from_dict(tag['embed'])
-            else:
-                tag = None
-        return tag
-    
+    async def find_db(self, name: str):
+        return await self.db.find_one({"name": name})
+
+
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
