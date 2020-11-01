@@ -31,6 +31,7 @@ class TagsPlugin(commands.Cog):
         else:
             await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
             await ctx.send(self.bot.accept)
+            return
 
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
