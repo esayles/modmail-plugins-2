@@ -14,69 +14,23 @@ class TagsPlugin(commands.Cog):
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
 
-    def apply_vars_dict(self, member, message, invite):
-        for k, v in message.items():
-            if isinstance(v, dict):
-                message[k] = self.apply_vars_dict(member, v, invite)
-            elif isinstance(v, str):
-                message[k] = apply_vars(self, member, v, invite)
-            elif isinstance(v, list):
-                message[k] = [self.apply_vars_dict(member, _v, invite) for _v in v]
-            if k == 'timestamp':
-                message[k] = v[:-1]
-        return message
-
-    def format_message(self, member, message, invite):
-        try:
-            message = json.loads(message)
-        except json.JSONDecodeError:
-            # message is not embed
-            message = apply_vars(self, member, message, invite)
-            message = {'content': message}
-        else:
-            # message is embed
-            message = self.apply_vars_dict(member, message, invite)
-
-            if any(i in message for i in ('embed', 'content')):
-                message['embed'] = discord.Embed.from_dict(message['embed'])
-            else:
-                message = None
-        return message
-        
-    @commands.group(invoke_without_command=True)
-    @commands.guild_only()
-    @checks.has_permissions(PermissionLevel.REGULAR)
-    async def tags(self, ctx: commands.Context):
-        """
-        Create Edit & Manage Tags
-        """
-        await ctx.send_help(ctx.command)
-
     @tags.command()
-    async def add(self, ctx: commands.Context, name: str, *, content: str):
+    async def add(self, ctx, name, *, value: commands.clean_content=None):
         """
         Make a new tag
         """
-        if (await self.find_db(name=name)) is not None:
-            await ctx.send(f":x: | Tag with name `{name}` already exists!")
-            return
-        else:
-            ctx.message.content = content
-            await self.db.insert_one(
-                {
-                    "name": name,
-                    "content": ctx.message.clean_content,
-                    "createdAt": datetime.utcnow(),
-                    "updatedAt": datetime.utcnow(),
-                    "author": ctx.author.id,
-                    "uses": 0,
-                }
-            )
+        if value.startswith('http'):
+            if value.startswith('https://hasteb.in') and 'raw' not in value:
+                value = 'https://hasteb.in/raw/' + value[18:]
 
-            await ctx.send(
-                f":white_check_mark: | Tag with name `{name}` has been successfully created!"
-            )
-            return
+            async with self.bot.session.get(value) as resp:
+                value = await resp.text()
+
+        if name in [i.qualified_name for i in self.bot.commands]:
+            await ctx.send('Name is already a pre-existing bot command')
+        else:
+            await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
+            await ctx.send(self.bot.accept)
 
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
@@ -194,30 +148,44 @@ class TagsPlugin(commands.Cog):
             return
 
     @commands.Cog.listener()
-    async def on_message(self, msg: discord.Message):
-        if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
-            return
-        
-        content = msg.content.replace(self.bot.prefix, "")
-        names = content.split(" ")
+    async def on_message(self, message):
+        if not message.author.bot and message.guild:
+            ctx = await self.bot.get_context(message)
+            guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
+            tags = [i.name for i in guild_config.tags]
 
-        tag = await self.db.find_one({"name": names[0]})
-        thing = json.loads(tag["content"])
-        embed = discord.Embed.from_dict(thing['embed'])
-        if tag is None:
-            return
+            if ctx.invoked_with in tags:
+                tag = guild_config.tags.get_kv('name', ctx.invoked_with)
+                await ctx.send(**self.format_message(tag.value, message))
+
+    def apply_vars_dict(self, tag, message):
+        for k, v in tag.items():
+            if isinstance(v, dict):
+                tag[k] = self.apply_vars_dict(v, message)
+            elif isinstance(v, str):
+                tag[k] = apply_vars(self, v, message)
+            elif isinstance(v, list):
+                tag[k] = [self.apply_vars_dict(_v, message) for _v in v]
+            if k == 'timestamp':
+                tag[k] = v[:-1]
+        return tag
+
+    def format_message(self, tag, message):
+        try:
+            tag = json.loads(tag)
+        except json.JSONDecodeError:
+            # message is not embed
+            tag = apply_vars(self, tag, message)
+            tag = {'content': tag}
         else:
-            
-            
-            
-            await msg.channel.send(embed=embed)
-            await self.db.find_one_and_update(
-                {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
-            )
-            return
+            # message is embed
+            tag = self.apply_vars_dict(tag, message)
 
-    async def find_db(self, name: str):
-        return await self.db.find_one({"name": name})
+            if any(i in message for i in ('embed', 'content')):
+                tag['embed'] = discord.Embed.from_dict(tag['embed'])
+            else:
+                tag = None
+        return tag
     
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
