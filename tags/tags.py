@@ -77,6 +77,18 @@ class TagsPlugin(commands.Cog):
                 f":white_check_mark: | Tag with name `{name}` has been successfully created!"
             )
             return
+        
+   @tag.command(6, name='list')
+    async def list_(self, ctx):
+        """Lists all tags"""
+        guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
+        tags = [i.name for i in guild_config.tags]
+
+        if tags:
+            await ctx.send('Tags: ' + ', '.join(tags))
+        else:
+            await ctx.send('No tags saved')
+
 
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
