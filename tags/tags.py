@@ -4,14 +4,12 @@ from discord.ext import commands
 
 from core import checks
 from core.models import PermissionLevel
-from core.command import group
-from core.utils import apply_vars
 
 
 class TagsPlugin(commands.Cog):
     def __init__(self, bot):
         self.bot: discord.Client = bot
-        self.coll = bot.plugin_db.get_partition(self)
+        self.db = bot.plugin_db.get_partition(self)
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -27,18 +25,9 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
-        if value.startswith('http'):
-            if value.startswith('https://hasteb.in') and 'raw' not in value:
-                value = 'https://hasteb.in/raw/' + value[18:]
-
-            async with self.bot.session.get(value) as resp:
-                value = await resp.text()
-                
-        if name in [i.qualified_name for i in self.bot.commands]:
-            await ctx.send('Name is already a pre-existing bot command')
-        else:
-            await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
-            await ctx.send(self.bot.accept)
+        if (await self.find_db(name=name)) is not None:
+            await ctx.send(f":x: | Tag with name `{name}` already exists!")
+            return
         else:
             ctx.message.content = content
             await self.db.insert_one(
