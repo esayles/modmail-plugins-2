@@ -13,7 +13,6 @@ class TagsPlugin(commands.Cog):
     def __init__(self, bot):
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
-
         
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
@@ -29,7 +28,6 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
-
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
             return
@@ -50,7 +48,7 @@ class TagsPlugin(commands.Cog):
                 f":white_check_mark: | Tag with name `{name}` has been successfully created!"
             )
             return
-            
+
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
