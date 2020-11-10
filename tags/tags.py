@@ -54,7 +54,7 @@ class TagsPlugin(commands.Cog):
         await ctx.send_help(ctx.command)
 
     @tag.command()
-    async def create(self, ctx: commands.Context, name: str, *, value: commands.clean_content) -> None:
+    async def create(self, ctx: commands.Context, name: str, *, value: commands.clean_content):
         """Create tags for your server.
         Example: tag create hello Hi! I am the bot responding!
         Complex usage: https://github.com/fourjr/rainbot/wiki/Tags
@@ -80,7 +80,7 @@ class TagsPlugin(commands.Cog):
         await ctx.send(self.bot.accept)
 
     @tag.command()
-    async def list_(self, ctx: commands.Context) -> None:
+    async def list_(self, ctx: commands.Context):
         """Lists all tags"""
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
         tags = [i.name for i in guild_config.tags]
@@ -91,7 +91,7 @@ class TagsPlugin(commands.Cog):
             await ctx.send('No tags saved')
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message) -> None:
+    async def on_message(self, message: discord.Message):
         if not message.author.bot and message.guild:
             ctx = await self.bot.get_context(message)
             guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
@@ -101,7 +101,7 @@ class TagsPlugin(commands.Cog):
                 tag = guild_config.tags.get_kv('name', ctx.invoked_with)
                 await ctx.send(**self.format_message(tag.value, message))
 
-    def apply_vars_dict(self, tag: Dict[str, Union[Any]], message: discord.Message) -> Dict[str, Union[Any]]:
+    def apply_vars_dict(self, tag: Dict[str, Union[Any]], message: discord.Message):
         for k, v in tag.items():
             if isinstance(v, dict):
                 tag[k] = self.apply_vars_dict(v, message)
@@ -113,7 +113,7 @@ class TagsPlugin(commands.Cog):
                 tag[k] = v[:-1]
         return tag
 
-    def format_message(self, tag: str, message: discord.Message) -> Dict[str, Union[Any]]:
+    def format_message(self, tag: str, message: discord.Message):
         updated_tag: Dict[str, Union[Any]]
         try:
             updated_tag = json.loads(tag)
