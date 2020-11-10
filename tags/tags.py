@@ -10,9 +10,10 @@ from core.models import PermissionLevel
 from .models import apply_vars, SafeString
 
 
-class Tags(commands.Cog):
+class TagsPlugin(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: discord.Client = bot
+        self.db = bot.plugin_db.get_partition(self)
 
     @group(6, invoke_without_command=True)
     async def tag(self, ctx: commands.Context) -> None:
