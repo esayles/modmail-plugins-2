@@ -39,7 +39,18 @@ class TagsPlugin(commands.Cog):
         if name in [i.qualified_name for i in self.bot.commands]:
             await ctx.send('Name is already a pre-existing bot command')
         else:
-            await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
+            ctx.message.content = content
+            await self.db.insert_one(
+                {
+                    "name": name,
+                    "content": ctx.message.clean_content,
+                    "createdAt": datetime.utcnow(),
+                    "updatedAt": datetime.utcnow(),
+                    "author": ctx.author.id,
+                    "uses": 0,
+                }
+            )
+
             await ctx.send(self.bot.accept)
             
     @tags.command()
