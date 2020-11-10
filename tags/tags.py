@@ -62,7 +62,7 @@ class TagsPlugin(commands.Cog):
 
         await ctx.send(self.bot.accept)
 
-    @tag.command(6, name='list')
+    @tag.command()
     async def list_(self, ctx: commands.Context) -> None:
         """Lists all tags"""
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
@@ -115,4 +115,4 @@ class TagsPlugin(commands.Cog):
         return updated_tag
     
 def setup(bot: modmail) -> None:
-    bot.add_cog(Tags(bot))
+    bot.add_cog(TagsPlugin(bot))
