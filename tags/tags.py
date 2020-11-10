@@ -57,27 +57,19 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
-        if (await self.find_db(name=name)) is not None:
-            await ctx.send(f":x: | Tag with name `{name}` already exists!")
-            return
+        if value.startswith('http'):
+            if value.startswith('https://hasteb.in') and 'raw' not in value:
+                value = 'https://hasteb.in/raw/' + value[18:]
+
+            async with self.bot.session.get(value) as resp:
+                value = await resp.text()
+
+        if name in [i.qualified_name for i in self.bot.commands]:
+            await ctx.send('Name is already a pre-existing bot command')
         else:
-            ctx.message.content = content
-            await self.db.insert_one(
-                {
-                    "name": name,
-                    "content": ctx.message.clean_content,
-                    "createdAt": datetime.utcnow(),
-                    "updatedAt": datetime.utcnow(),
-                    "author": ctx.author.id,
-                    "uses": 0,
-                }
-            )
-
-            await ctx.send(
-                f":white_check_mark: | Tag with name `{name}` has been successfully created!"
-            )
-            return
-
+            await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
+            await ctx.send(self.bot.accept)
+            
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
