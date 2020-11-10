@@ -41,7 +41,16 @@ class TagsPlugin(commands.Cog):
             return
         else:
             ctx.message.content = content
-            await self.db.insert_one(ctx.guild.id, {"$push": {"tags": {"name": name, "value": value}}})
+            await self.db.insert_one(
+                {
+                    "name": name,
+                    "value": value,
+                    "createdAt": datetime.utcnow(),
+                    "updatedAt": datetime.utcnow(),
+                    "author": ctx.author.id,
+                    "uses": 0,
+                }
+            )
             await ctx.send(
                 f":white_check_mark: | Tag with name `{name}` has been successfully created!"
             )
