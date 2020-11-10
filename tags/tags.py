@@ -11,9 +11,21 @@ from .models import apply_vars, SafeString
 
 
 class TagsPlugin(commands.Cog):
-    def __init__(self, bot: modmail) -> none
+    def __init__(self, bot):
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
+
+    def apply_vars_dict(self, member, message, invite):
+        for k, v in message.items():
+            if isinstance(v, dict):
+                message[k] = self.apply_vars_dict(member, v, invite)
+            elif isinstance(v, str):
+                message[k] = apply_vars(self, member, v, invite)
+            elif isinstance(v, list):
+                message[k] = [self.apply_vars_dict(member, _v, invite) for _v in v]
+            if k == 'timestamp':
+                message[k] = v[:-1]
+        return message
 
     @group(6, invoke_without_command=True)
     async def tag(self, ctx: commands.Context) -> None:
