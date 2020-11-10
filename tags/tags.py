@@ -11,7 +11,7 @@ from .models import apply_vars, SafeString
 
 
 class TagsPlugin(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: modmail) -> none
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
 
