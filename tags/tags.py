@@ -11,7 +11,7 @@ from .models import apply_vars, SafeString
 
 
 class Tags(commands.Cog):
-    def __init__(self, bot: rainbot) -> None:
+    def __init__(self, bot):
         self.bot = bot
 
     @group(6, invoke_without_command=True)
