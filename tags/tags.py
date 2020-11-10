@@ -28,6 +28,24 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
+        
+        if message.startswith('https://') or message.startswith('http://'):
+            # message is a URL
+            if message.startswith('https://hasteb.in/'):
+                message = 'https://hasteb.in/raw/' + message.split('/')[-1]
+
+            async with self.bot.session.get(message) as resp:
+                message = await resp.text()
+
+        formatted_message = self.format_message(ctx.author, message, SafeString('{invite}'))
+        if formatted_message:
+            await channel.send(**formatted_message)
+            await self.db.find_one_and_update(
+                {'_id': 'config'},
+                {'$set': {'Embeds': {'channel': str(channel.id), 'message': message}}},
+                upsert=True
+            )
+            
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
             return
