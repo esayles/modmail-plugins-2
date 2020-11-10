@@ -1,5 +1,9 @@
-  
+from typing import Any, Callable
+
 import string
+
+import discord
+from discord.ext import commands
 
 
 class SafeFormat(object):
