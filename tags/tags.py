@@ -44,13 +44,14 @@ class TagsPlugin(commands.Cog):
             await self.db.insert_one(
                 {
                     "name": name,
-                    "value": value,
+                    "content": value,
                     "createdAt": datetime.utcnow(),
                     "updatedAt": datetime.utcnow(),
                     "author": ctx.author.id,
                     "uses": 0,
                 }
             )
+            
             await ctx.send(
                 f":white_check_mark: | Tag with name `{name}` has been successfully created!"
             )
