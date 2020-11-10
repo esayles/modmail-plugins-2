@@ -11,7 +11,7 @@ from .models import apply_vars, SafeString
 
 
 class TagsPlugin(commands.Cog):
-    def __init__(self, bot: modmail) -> none:
+    def __init__(self, bot):
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
 
@@ -131,5 +131,5 @@ class TagsPlugin(commands.Cog):
                 updated_tag = None
         return updated_tag
     
-def setup(bot: modmail) -> None:
+def setup(bot):
     bot.add_cog(TagsPlugin(bot))
