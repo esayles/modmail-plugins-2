@@ -44,7 +44,7 @@ class TagsPlugin(commands.Cog):
             await self.db.insert_one(
                 {
                     "name": name,
-                    "content": value,
+                    "content": ctx.message.clean_content,
                     "createdAt": datetime.utcnow(),
                     "updatedAt": datetime.utcnow(),
                     "author": ctx.author.id,
