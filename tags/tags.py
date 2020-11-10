@@ -27,12 +27,16 @@ class TagsPlugin(commands.Cog):
                 message[k] = v[:-1]
         return message
 
-    @group(6, invoke_without_command=True)
-    async def tag(self, ctx: commands.Context) -> None:
-        """Controls tags in your server"""
-        await ctx.invoke(self.bot.get_command('help'), command_or_cog='tag')
+    @commands.group(invoke_without_command=True)
+    @commands.guild_only()
+    @checks.has_permissions(PermissionLevel.REGULAR)
+    async def tags(self, ctx: commands.Context):
+        """
+        Create Edit & Manage Tags
+        """
+        await ctx.send_help(ctx.command)
 
-    @tag.command(6)
+    @tag.command()
     async def create(self, ctx: commands.Context, name: str, *, value: commands.clean_content) -> None:
         """Create tags for your server.
         Example: tag create hello Hi! I am the bot responding!
@@ -51,7 +55,7 @@ class TagsPlugin(commands.Cog):
             await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
             await ctx.send(self.bot.accept)
 
-    @tag.command(6)
+    @tag.command()
     async def remove(self, ctx: commands.Context, name: str) -> None:
         """Removes a tag"""
         await self.bot.db.update_guild_config(ctx.guild.id, {'$pull': {'tags': {'name': name}}})
