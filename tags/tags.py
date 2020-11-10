@@ -1,5 +1,4 @@
 import json
-from typing import Any, Dict, Union
 
 import discord
 from datetime import datetime
@@ -26,7 +25,24 @@ class TagsPlugin(commands.Cog):
             if k == 'timestamp':
                 message[k] = v[:-1]
         return message
-    
+
+    def format_message(self, member, message, invite):
+        try:
+            message = json.loads(message)
+        except json.JSONDecodeError:
+            # message is not embed
+            message = apply_vars(self, member, message, invite)
+            message = {'content': message}
+        else:
+            # message is embed
+            message = self.apply_vars_dict(member, message, invite)
+
+            if any(i in message for i in ('embed', 'content')):
+                message['embed'] = discord.Embed.from_dict(message['embed'])
+            else:
+                message = None
+        return message
+        
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
     @checks.has_permissions(PermissionLevel.REGULAR)
@@ -36,13 +52,12 @@ class TagsPlugin(commands.Cog):
         """
         await ctx.send_help(ctx.command)
 
-    @tag.command()
-    async def create(self, ctx: commands.Context, name: str, *, value: commands.clean_content):
-        """Create tags for your server.
-        Example: tag create hello Hi! I am the bot responding!
-        Complex usage: https://github.com/fourjr/rainbot/wiki/Tags
+    @tags.command()
+    async def add(self, ctx: commands.Context, name: str, *, value: commands.clean_content):
         """
-        if value.startswith('http'):
+        Make a new tag
+        """
+       if value.startswith('http'):
             if value.startswith('https://hasteb.in') and 'raw' not in value:
                 value = 'https://hasteb.in/raw/' + value[18:]
 
@@ -55,64 +70,146 @@ class TagsPlugin(commands.Cog):
             await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
             await ctx.send(self.bot.accept)
 
-    @tag.command()
-    async def remove(self, ctx: commands.Context, name: str) -> None:
-        """Removes a tag"""
-        await self.bot.db.update_guild_config(ctx.guild.id, {'$pull': {'tags': {'name': name}}})
+    @tags.command()
+    async def edit(self, ctx: commands.Context, name: str, *, content: str):
+        """
+        Edit an existing tag
+        Only owner of tag or user with Manage Server permissions can use this command
+        """
+        tag = await self.find_db(name=name)
 
-        await ctx.send(self.bot.accept)
-
-    @tag.command()
-    async def list(self, ctx: commands.Context):
-        """Lists all tags"""
-        guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-        tags = [i.name for i in guild_config.tags]
-
-        if tags:
-            await ctx.send('Tags: ' + ', '.join(tags))
+        if tag is None:
+            await ctx.send(f":x: | Tag with name `{name}` dose'nt exist")
+            return
         else:
-            await ctx.send('No tags saved')
+            member: discord.Member = ctx.author
+            if ctx.author.id == tag["author"] or member.guild_permissions.manage_guild:
+                await self.db.find_one_and_update(
+                    {"name": name},
+                    {"$set": {"content": content, "updatedAt": datetime.utcnow()}},
+                )
+
+                await ctx.send(
+                    f":white_check_mark: | Tag `{name}` is updated successfully!"
+                )
+            else:
+                await ctx.send("You don't have enough permissions to edit that tag")
+
+    @tags.command()
+    async def delete(self, ctx: commands.Context, name: str):
+        """
+        Delete a tag.
+        Only owner of tag or user with Manage Server permissions can use this command
+        """
+        tag = await self.find_db(name=name)
+        if tag is None:
+            await ctx.send(":x: | Tag `{name}` not found in the database.")
+        else:
+            if (
+                ctx.author.id == tag["author"]
+                or ctx.author.guild_permissions.manage_guild
+            ):
+                await self.db.delete_one({"name": name})
+
+                await ctx.send(
+                    f":white_check_mark: | Tag `{name}` has been deleted successfully!"
+                )
+            else:
+                await ctx.send("You don't have enough permissions to delete that tag")
+
+    @tags.command()
+    async def claim(self, ctx: commands.Context, name: str):
+        """
+        Claim a tag if the user has left the server
+        """
+        tag = await self.find_db(name=name)
+
+        if tag is None:
+            await ctx.send(":x: | Tag `{name}` not found.")
+        else:
+            member = await ctx.guild.get_member(tag["author"])
+            if member is not None:
+                await ctx.send(
+                    f":x: | The owner of the tag is still in the server `{member.name}#{member.discriminator}`"
+                )
+                return
+            else:
+                await self.db.find_one_and_update(
+                    {"name": name},
+                    {"$set": {"author": ctx.author.id, "updatedAt": datetime.utcnow()}},
+                )
+
+                await ctx.send(
+                    f":white_check_mark: | Tag `{name}` is now owned by `{ctx.author.name}#{ctx.author.discriminator}`"
+                )
+
+    @tags.command()
+    async def info(self, ctx: commands.Context, name: str):
+        """
+        Get info on a tag
+        """
+        tag = await self.find_db(name=name)
+
+        if tag is None:
+            await ctx.send(":x: | Tag `{name}` not found.")
+        else:
+            user: discord.User = await self.bot.fetch_user(tag["author"])
+            embed = discord.Embed()
+            embed.colour = discord.Colour.green()
+            embed.title = f"{name}'s Info"
+            embed.add_field(
+                name="Created By", value=f"{user.name}#{user.discriminator}"
+            )
+            embed.add_field(name="Created At", value=tag["createdAt"])
+            embed.add_field(
+                name="Last Modified At", value=tag["updatedAt"], inline=False
+            )
+            embed.add_field(name="Uses", value=tag["uses"], inline=False)
+            await ctx.send(embed=embed)
+            return
+
+    @commands.command()
+    async def tag(self, ctx: commands.Context, name: str):
+        
+        """
+        Use a tag!
+        """
+        tag = await self.find_db(name=name)
+        if tag is None:
+            await ctx.send(f":x: | Tag {name} not found.")
+            return
+        else:
+            await ctx.send(tag["content"])
+            await self.db.find_one_and_update(
+                {"name": name}, {"$set": {"uses": tag["uses"] + 1}}
+            )
+            return
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
-        if not message.author.bot and message.guild:
-            ctx = await self.bot.get_context(message)
-            guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-            tags = [i.name for i in guild_config.tags]
+    async def on_message(self, msg: discord.Message):
+        if not msg.content.startswith(self.bot.prefix) or msg.author.bot:
+            return
+        
+        content = msg.content.replace(self.bot.prefix, "")
+        names = content.split(" ")
 
-            if ctx.invoked_with in tags:
-                tag = guild_config.tags.get_kv('name', ctx.invoked_with)
-                await ctx.send(**self.format_message(tag.value, message))
-
-    def apply_vars_dict(self, tag: Dict[str, Union[Any]], message: discord.Message):
-        for k, v in tag.items():
-            if isinstance(v, dict):
-                tag[k] = self.apply_vars_dict(v, message)
-            elif isinstance(v, str):
-                tag[k] = apply_vars(self.bot, v, message)
-            elif isinstance(v, list):
-                tag[k] = [self.apply_vars_dict(_v, message) for _v in v]
-            if k == 'timestamp':
-                tag[k] = v[:-1]
-        return tag
-
-    def format_message(self, tag: str, message: discord.Message):
-        updated_tag: Dict[str, Union[Any]]
-        try:
-            updated_tag = json.loads(tag)
-        except json.JSONDecodeError:
-            # message is not embed
-            tag = apply_vars(self.bot, tag, message)
-            updated_tag = {'content': tag}
+        tag = await self.db.find_one({"name": names[0]})
+        thing = json.loads(tag["content"])
+        embed = discord.Embed.from_dict(thing['embed'])
+        if tag is None:
+            return
         else:
-            # message is embed
-            updated_tag = self.apply_vars_dict(updated_tag, message)
+            
+            
+            
+            await msg.channel.send(embed=embed)
+            await self.db.find_one_and_update(
+                {"name": names[0]}, {"$set": {"uses": tag["uses"] + 1}}
+            )
+            return
 
-            if 'embed' in updated_tag:
-                updated_tag['embed'] = discord.Embed.from_dict(updated_tag['embed'])
-            else:
-                updated_tag = None
-        return updated_tag
+    async def find_db(self, name: str):
+        return await self.db.find_one({"name": name})
     
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
