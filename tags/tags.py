@@ -30,11 +30,11 @@ class TagsPlugin(commands.Cog):
         Make a new tag
         """
         if value.startswith('http'):
-            if value.startswith('https://hasteb.in') and 'raw' not in value:
-                value = 'https://hasteb.in/raw/' + value[18:]
+            if ctx.message.content('https://hasteb.in') and 'raw' not in ctx.message.content:
+                ctx.message.content = 'https://hasteb.in/raw/' + ctx.message.content[18:]
 
-            async with self.bot.session.get(value) as resp:
-                value = await resp.text()
+            async with self.bot.session.get(ctx.message.content) as resp:
+                ctx.message.content = await resp.text()
 
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
@@ -51,7 +51,7 @@ class TagsPlugin(commands.Cog):
                     "uses": 0,
                 }
             )
-            
+
             await ctx.send(
                 f":white_check_mark: | Tag with name `{name}` has been successfully created!"
             )
