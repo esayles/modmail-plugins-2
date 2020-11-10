@@ -40,17 +40,8 @@ class TagsPlugin(commands.Cog):
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
             return
         else:
-            ctx.message.content = content
-            await self.db.insert_one(
-                {
-                    "name": name,
-                    "content": ctx.message.clean_content,
-                    "createdAt": datetime.utcnow(),
-                    "updatedAt": datetime.utcnow(),
-                    "author": ctx.author.id,
-                    "uses": 0,
-                }
-            )
+            await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
+            await ctx.send(self.bot.accept)
 
             await ctx.send(self.bot.accept)
             
