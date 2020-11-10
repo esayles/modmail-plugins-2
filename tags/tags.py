@@ -41,10 +41,11 @@ class TagsPlugin(commands.Cog):
             return
         else:
             ctx.message.content = content
-            await self.bot.db.update_guild_config(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
-            await ctx.send(self.bot.accept)
-
-            await ctx.send(self.bot.accept)
+            await self.db.insert_one(ctx.guild.id, {'$push': {'tags': {'name': name, 'value': value}}})
+            await ctx.send(
+                f":white_check_mark: | Tag with name `{name}` has been successfully created!"
+            )
+            return
             
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
