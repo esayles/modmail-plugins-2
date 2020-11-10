@@ -27,22 +27,22 @@ class TagsPlugin(commands.Cog):
                 message[k] = v[:-1]
         return message
      
-     def format_message(self, member, message, invite):
-        try:
-            message = json.loads(message)
-        except json.JSONDecodeError:
-            # message is not embed
-            message = apply_vars(self, member, message, invite)
-            message = {'content': message}
-        else:
-            # message is embed
-            message = self.apply_vars_dict(member, message, invite)
+    def format_message(self, member, message, invite):
+       try:
+           message = json.loads(message)
+       except json.JSONDecodeError:
+           # message is not embed
+           message = apply_vars(self, member, message, invite)
+           message = {'content': message}
+       else:
+           # message is embed
+           message = self.apply_vars_dict(member, message, invite)
 
-            if any(i in message for i in ('embed', 'content')):
+           if any(i in message for i in ('embed', 'content')):
                 message['embed'] = discord.Embed.from_dict(message['embed'])
-            else:
-                message = None
-        return message
+           else:
+               message = None
+       return message
 
     @commands.group(invoke_without_command=True)
     @commands.guild_only()
