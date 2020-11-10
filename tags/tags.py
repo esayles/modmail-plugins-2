@@ -1,4 +1,5 @@
 import json
+from typing import Any, Dict, Union
 
 import discord
 from datetime import datetime
@@ -57,6 +58,13 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
+        if value.startswith('http'):
+            if value.startswith('https://hasteb.in') and 'raw' not in value:
+                value = 'https://hasteb.in/raw/' + value[18:]
+
+            async with self.bot.session.get(value) as resp:
+                value = await resp.text()
+
         formatted_message = self.format_message(ctx.author, message, SafeString('{invite}'))
         if formatted_message:
             await channel.send(**formatted_message)
