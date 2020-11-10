@@ -36,8 +36,9 @@ class TagsPlugin(commands.Cog):
             async with self.bot.session.get(value) as resp:
                 value = await resp.text()
 
-        if name in [i.qualified_name for i in self.bot.commands]:
-            await ctx.send('Name is already a pre-existing bot command')
+        if (await self.find_db(name=name)) is not None:
+            await ctx.send(f":x: | Tag with name `{name}` already exists!")
+            return
         else:
             ctx.message.content = content
             await self.db.insert_one(
