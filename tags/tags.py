@@ -80,7 +80,7 @@ class TagsPlugin(commands.Cog):
         await ctx.send(self.bot.accept)
 
     @tag.command()
-    async def list_(self, ctx: commands.Context):
+    async def list(self, ctx: commands.Context):
         """Lists all tags"""
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
         tags = [i.name for i in guild_config.tags]
