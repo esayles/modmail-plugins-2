@@ -62,14 +62,18 @@ class TagsPlugin(commands.Cog):
             await ctx.send(f":x: | Tag with name `{name}` dose'nt exist")
             return
         else:
-            await self.db.find_one_and_update(
-                {"name": name},
-                {"$set": {"content": content, "updatedAt": datetime.utcnow()}},
-            )
+            member: discord.Member = ctx.author
+            if ctx.author.id == tag["author"] or member.guild_permissions.manage_guild:
+                await self.db.find_one_and_update(
+                    {"name": name},
+                    {"$set": {"content": content, "updatedAt": datetime.utcnow()}},
+                )
 
-            await ctx.send(
-                f":white_check_mark: | Tag `{name}` is updated successfully!"
-            )
+                await ctx.send(
+                    f":white_check_mark: | Tag `{name}` is updated successfully!"
+                )
+            else:
+                await ctx.send("You don't have enough permissions to edit that tag")
 
     @tags.command()
     async def delete(self, ctx: commands.Context, name: str):
