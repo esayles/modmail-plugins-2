@@ -63,7 +63,7 @@ class TagsPlugin(commands.Cog):
             return
         else:
             member: discord.Member = ctx.author
-            if message.member.roles.find(r => r.name == "Editor") || message.member.roles.find(r => rname == "DiabMod")):
+            if ctx.author message.member.roles.find(r => r.name == "Editor") || message.member.roles.find(r => rname == "DiabMod")):
                 await self.db.find_one_and_update(
                     {"name": name},
                     {"$set": {"content": content, "updatedAt": datetime.utcnow()}},
