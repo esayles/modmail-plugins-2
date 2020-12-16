@@ -59,18 +59,15 @@ class TagsPlugin(commands.Cog):
             return
         
     @tags.command()
-    async def list(self, ctx: commands.Context):
+    async def list(self, ctx: commands.Context,):
         """
         Show list of commands
         """
-        guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-        tags = [i.name for i in guild_config.tags]
+        tag = await self.find_db(name=name)
 
-        if tags:
-            await ctx.send('Tags: ' + ', '.join(tags))
+        if tag is None:
+            await ctx.send(":x: | Tag `{name}` not found.")
         else:
-            await ctx.send('No tags saved')   
-
 
 
     @tags.command()
@@ -157,7 +154,9 @@ class TagsPlugin(commands.Cog):
             await ctx.send(":x: | Tag `{name}` not found.")
         else:
             user: discord.User = await self.bot.fetch_user(tag["author"])
+            
             embed = discord.Embed()
+            embed.set_author(name=f"{user.name}#{user.discriminator}")
             embed.colour = discord.Colour.green()
             embed.title = f"{name}'s Info"
             embed.add_field(
