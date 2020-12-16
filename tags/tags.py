@@ -58,9 +58,9 @@ class TagsPlugin(commands.Cog):
         
     """@tags.command()
     async def list(self, ctx: commands.Context):
-        """
+        
         Show list of commands
-        """
+        
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
         tags = self.find_db(name=name)
 
@@ -225,6 +225,6 @@ class TagsPlugin(commands.Cog):
                 updated_tag = None
         return updated_tag
 
-        
+
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
