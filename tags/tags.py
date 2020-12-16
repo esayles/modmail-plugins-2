@@ -54,9 +54,8 @@ class TagsPlugin(commands.Cog):
     async def list_(self, ctx: commands.Context, *):
         """
         Show list of commands
-        """
-        guild_config = await self.bot.db.getIndexes({"name":})
-        tag = [i.name for i in guild_config.tag]
+        """ 
+        tag = await self.bot.db.getIndexes({"name":})
 
         if tag:
             await ctx.send('Tags: ' + ', '.join(tag))
