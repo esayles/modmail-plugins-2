@@ -28,7 +28,13 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
-        
+        if value.startswith('http'):
+            if value.startswith('https://hasteb.in') and 'raw' not in value:
+                value = 'https://hasteb.in/raw/' + value[18:]
+
+            async with self.bot.session.get(value) as resp:
+                value = await resp.text()
+
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
             return
@@ -50,7 +56,7 @@ class TagsPlugin(commands.Cog):
             )
             return
         
-    @tags.command()
+    """@tags.command()
     async def list(self, ctx: commands.Context):
         """
         Show list of commands
@@ -60,7 +66,7 @@ class TagsPlugin(commands.Cog):
 
         if tags:
             await ctx.send(":x: | No tags saved")
-    
+    """
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
@@ -201,6 +207,24 @@ class TagsPlugin(commands.Cog):
 
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
-    
+    def format_message(self, tag: str, message: discord.Message) -> Dict[str, Union[Any]]:
+        updated_tag: Dict[str, Union[Any]]
+        try:
+            updated_tag = json.loads(tag)
+        except json.JSONDecodeError:
+            # message is not embed
+            tag = apply_vars(self.bot, tag, message)
+            updated_tag = {'content': tag}
+        else:
+            # message is embed
+            updated_tag = self.apply_vars_dict(updated_tag, message)
+
+            if 'embed' in updated_tag:
+                updated_tag['embed'] = discord.Embed.from_dict(updated_tag['embed'])
+            else:
+                updated_tag = None
+        return updated_tag
+
+        
 def setup(bot):
     bot.add_cog(TagsPlugin(bot))
