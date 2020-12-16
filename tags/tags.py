@@ -58,7 +58,7 @@ class TagsPlugin(commands.Cog):
         tag = await self.find_db(name=name)
 
         if tag:
-            await ctx.send('Tags: ' + ', '.join(tags))
+            await ctx.send('Tags: ' + ', '.join(tag))
         else:
             await ctx.send('No tags saved')   
 
