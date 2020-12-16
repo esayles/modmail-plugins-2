@@ -34,6 +34,10 @@ class TagsPlugin(commands.Cog):
 
             async with self.bot.session.get(value) as resp:
                 value = await resp.text()
+                
+        if (await self.find_db(name=name)) is not None:
+            await ctx.send(f":x: | Tag with name `{name}` already exists!")
+            return
         else:
             ctx.message.content = content
             await self.db.insert_one(
@@ -203,6 +207,7 @@ class TagsPlugin(commands.Cog):
 
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
+        
     def format_message(self, tag: str, message: discord.Message) -> Dict[str, Union[Any]]:
         updated_tag: Dict[str, Union[Any]]
         try:
