@@ -55,7 +55,7 @@ class TagsPlugin(commands.Cog):
         """
         Show list of commands
         """
-        guild_config = await self.bot.db.getIndexes(ctx.guild.id)
+        guild_config = await self.bot.db.getIndexes({"name":})
         tag = [i.name for i in guild_config.tag]
 
         if tag:
