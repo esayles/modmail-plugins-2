@@ -57,17 +57,17 @@ class TagsPlugin(commands.Cog):
             )
             return
         
-    """@tags.command()
+    @tags.command()
     async def list(self, ctx: commands.Context):
-        
+        """
         Show list of commands
-        
+        """
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
         tags = self.find_db(name=name)
 
         if tags:
             await ctx.send(":x: | No tags saved")
-    """
+    
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
