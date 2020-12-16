@@ -55,10 +55,9 @@ class TagsPlugin(commands.Cog):
         """
         Show list of commands
         """
-        guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-        tags = [i.name for i in guild_config.tags]
+        tag = await self.find_db(name=name)
 
-        if tags:
+        if tag:
             await ctx.send('Tags: ' + ', '.join(tags))
         else:
             await ctx.send('No tags saved')   
