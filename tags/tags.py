@@ -55,7 +55,7 @@ class TagsPlugin(commands.Cog):
         """
         Show list of commands
         """ 
-        tag = await self.bot.db.getIndexes({"name":})
+        tag = await self.bot.db.getIndexes(name=name)
 
         if tag:
             await ctx.send('Tags: ' + ', '.join(tag))
