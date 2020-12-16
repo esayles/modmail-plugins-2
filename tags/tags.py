@@ -51,7 +51,7 @@ class TagsPlugin(commands.Cog):
             return
         
     @tags.command(name='list')
-    async def list_(self, ctx: commands.Context):
+    async def list_(self, ctx: commands.Context name:str):
         """
         Show list of commands
         """
