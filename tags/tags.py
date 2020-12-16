@@ -29,13 +29,7 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
-        if message.startswith("https://") or message.startswith("http://"):
-            # message is a URL
-            if message.startswith("https://hasteb.in/"):
-                message = "https://hasteb.in/raw/" + message.split("/")[-1]
-
-            async with self.bot.session.get(message) as resp:
-                message = await resp.text()
+        
 
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
