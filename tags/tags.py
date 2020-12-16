@@ -64,11 +64,15 @@ class TagsPlugin(commands.Cog):
         Show list of commands
         """
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-        tags = self.find_db(name=name)
+        tags = [i.name for i in guild_config.tags]
 
         if tags:
-            await ctx.send(":x: | No tags saved")
-    
+            await ctx.send('Tags: ' + ', '.join(tags))
+        else:
+            await ctx.send('No tags saved')   
+
+
+
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
         """
