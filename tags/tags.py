@@ -5,8 +5,8 @@ import discord
 from datetime import datetime
 from discord.ext import commands
 
-from core import checks
-from core.models import PermissionLevel
+from tagss import checks
+from tagss.models import PermissionLevel
 from .models import apply_vars, SafeString
 
 
@@ -159,9 +159,7 @@ class TagsPlugin(commands.Cog):
             embed.set_author(name=f"{user.name}#{user.discriminator}")
             embed.colour = discord.Colour.green()
             embed.title = f"{name}'s Info"
-            embed.add_field(
-                name="Created By", value=f"{user.name}#{user.discriminator}"
-            )
+            
             embed.add_field(name="Created At", value=tag["createdAt"])
             embed.add_field(
                 name="Last Modified At", value=tag["updatedAt"], inline=False
