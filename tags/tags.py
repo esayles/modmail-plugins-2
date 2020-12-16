@@ -1,4 +1,5 @@
 import json
+from typing import Any, Dict, Union
 
 import discord
 from datetime import datetime
@@ -207,7 +208,7 @@ class TagsPlugin(commands.Cog):
 
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
-        
+
     def format_message(self, tag: str, message: discord.Message) -> Dict[str, Union[Any]]:
         updated_tag: Dict[str, Union[Any]]
         try:
