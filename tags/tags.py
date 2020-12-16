@@ -49,7 +49,7 @@ class TagsPlugin(commands.Cog):
                 f":white_check_mark: | Tag with name `{name}` has been successfully created!"
             )
             return
-    @tags.command
+    @tags.command()
     async def list(self, ctx: commands.Context, name: str, *, content: str):
         """
         Show list of commands
