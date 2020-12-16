@@ -5,8 +5,8 @@ import discord
 from datetime import datetime
 from discord.ext import commands
 
-from tagss import checks
-from tagss.models import PermissionLevel
+from core import checks
+from core.models import PermissionLevel
 from .models import apply_vars, SafeString
 
 
@@ -29,8 +29,6 @@ class TagsPlugin(commands.Cog):
         """
         Make a new tag
         """
-        
-
         if (await self.find_db(name=name)) is not None:
             await ctx.send(f":x: | Tag with name `{name}` already exists!")
             return
@@ -53,15 +51,18 @@ class TagsPlugin(commands.Cog):
             return
         
     @tags.command()
-    async def list(self, ctx: commands.Context,):
+    async def list(self, ctx: commands.Context):
         """
         Show list of commands
         """
-        tag = await self.find_db(name=name)
+        guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
+        tags = [i.name for i in guild_config.tags]
 
-        if tag is None:
-            await ctx.send(":x: | Tag `{name}` not found.")
+        if tags:
+            await ctx.send('Tags: ' + ', '.join(tags))
         else:
+            await ctx.send('No tags saved')   
+
 
 
     @tags.command()
@@ -148,12 +149,12 @@ class TagsPlugin(commands.Cog):
             await ctx.send(":x: | Tag `{name}` not found.")
         else:
             user: discord.User = await self.bot.fetch_user(tag["author"])
-            
             embed = discord.Embed()
-            embed.set_author(name=f"{user.name}#{user.discriminator}")
             embed.colour = discord.Colour.green()
             embed.title = f"{name}'s Info"
-            
+            embed.add_field(
+                name="Created By", value=f"{user.name}#{user.discriminator}"
+            )
             embed.add_field(name="Created At", value=tag["createdAt"])
             embed.add_field(
                 name="Last Modified At", value=tag["updatedAt"], inline=False
