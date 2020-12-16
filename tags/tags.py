@@ -49,13 +49,14 @@ class TagsPlugin(commands.Cog):
                 f":white_check_mark: | Tag with name `{name}` has been successfully created!"
             )
             return
+        
     @tags.command()
-    async def list(self, ctx: commands.Context, name: str, *, content: str):
+    async def list(self, ctx: commands.Context, name: str):
         """
         Show list of commands
         """
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-        tags = [i.name for i in guild_config.tags]
+        tags = self.find_db(name=name)
 
         if tags:
             await ctx.send('Tags: ' + ', '.join(tags))
