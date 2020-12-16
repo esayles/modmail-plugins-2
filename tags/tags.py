@@ -58,10 +58,23 @@ class TagsPlugin(commands.Cog):
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
         tags = self.find_db(name=name)
 
-        if tags:
-            await ctx.send('Tags: ' + ', '.join(tags))
+        if tags is None:
+            await ctx.send(":x: | No tags saved")
         else:
-            await ctx.send('No tags saved')
+            user: discord.User = await self.bot.fetch_user(tag["author"])
+            embed = discord.Embed()
+            embed.colour = discord.Colour.black()
+            embed.title = f"{name}'s Info"
+            embed.add_field(
+                name="Created By", value=f"{user.name}#{user.discriminator}"
+            )
+            embed.add_field(name="Created At", value=tag["createdAt"])
+            embed.add_field(
+                name="Last Modified At", value=tag["updatedAt"], inline=False
+            )
+            embed.add_field(name="Uses", value=tag["uses"], inline=False)
+            await ctx.send(embed=embed)
+            return
 
     @tags.command()
     async def edit(self, ctx: commands.Context, name: str, *, content: str):
