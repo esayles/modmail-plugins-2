@@ -56,7 +56,7 @@ class TagsPlugin(commands.Cog):
         Show list of commands
         """
         tag = await self.db.collection.getIndexes(
-            {"name":},
+            {"name":}
         )
 
         if tag:
