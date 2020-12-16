@@ -58,7 +58,7 @@ class TagsPlugin(commands.Cog):
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
         tags = self.find_db(name=name)
 
-        if tags:
+        if:
             await ctx.send(":x: | No tags saved")
 
     @tags.command()
