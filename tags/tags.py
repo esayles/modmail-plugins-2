@@ -56,7 +56,7 @@ class TagsPlugin(commands.Cog):
         Show list of commands
         """
         guild_config = await self.bot.db.get_guild_config(ctx.guild.id)
-        tag = [i.name for i in guild_config.tags]
+        tag = [i.name for i in guild_config.tag]
 
         if tag:
             await ctx.send('Tags: ' + ', '.join(tag))
