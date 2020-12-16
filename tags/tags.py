@@ -51,12 +51,12 @@ class TagsPlugin(commands.Cog):
             return
         
     @tags.command(name='list')
-    async def list_(self, ctx: commands.Context, name:str):
+    async def list_(self, ctx: commands.Context):
         """
         Show list of commands
         """
-        tag = await self.db.collection.getIndexes(name=name)
-        
+        tag = await self.db.find_db({"name": name})
+
         if tag:
             await ctx.send('Tags: ' + ', '.join(tag))
         else:
