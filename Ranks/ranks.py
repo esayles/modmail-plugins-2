@@ -21,5 +21,6 @@ class RanksPlugin(commands.Cog):
     async def say(self, ctx, *, message):
         await ctx.send(message)
 
+
 def setup(bot):
     bot.add_cog(MyCog(bot))
