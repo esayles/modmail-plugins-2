@@ -12,6 +12,7 @@ class RanksPlugin(commands.Cog):
     def __init__(self, bot):
         self.bot: discord.Client = bot
         self.db = bot.plugin_db.get_partition(self)
+        self.active_Ranks = {}
 
     @commands.Cog.listener()
     async def on_message(self, message):
