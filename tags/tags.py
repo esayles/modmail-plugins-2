@@ -205,23 +205,23 @@ class TagsPlugin(commands.Cog):
     async def find_db(self, name: str):
         return await self.db.find_one({"name": name})
 
-    def format_message(self, tag: str, message: discord.Message) -> Dict[str, Union[Any]]:
-        updated_tag: Dict[str, Union[Any]]
-        try:
-            updated_tag = json.loads(tag)
-        except json.JSONDecodeError:
-            # message is not embed
-            tag = apply_vars(self.bot, tag, message)
-            updated_tag = {'content': tag}
-        else:
-            # message is embed
-            updated_tag = self.apply_vars_dict(updated_tag, message)
+    #def format_message(self, tag: str, message: discord.Message) -> Dict[str, Union[Any]]:
+    #    updated_tag: Dict[str, Union[Any]]
+    #    try:
+    #        updated_tag = json.loads(tag)
+    #    except json.JSONDecodeError:
+    #        # message is not embed
+    #        tag = apply_vars(self.bot, tag, message)
+    #        updated_tag = {'content': tag}
+    #    else:
+    #        # message is embed
+    #        updated_tag = self.apply_vars_dict(updated_tag, message)
 
-            if 'embed' in updated_tag:
-                updated_tag['embed'] = discord.Embed.from_dict(updated_tag['embed'])
-            else:
-                updated_tag = None
-        return updated_tag
+    #        if 'embed' in updated_tag:
+    #            updated_tag['embed'] = discord.Embed.from_dict(updated_tag['embed'])
+    #        else:
+    #            updated_tag = None
+    #    return updated_tag
 
 
 def setup(bot):
