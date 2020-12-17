@@ -24,4 +24,4 @@ class RanksPlugin(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(MyCog(bot))
+    bot.add_cog(RanksPlugin(bot))
