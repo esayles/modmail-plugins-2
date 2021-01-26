@@ -67,7 +67,7 @@ class TagsPlugin(commands.Cog):
             except:
                 continue
 
-        send_tags = '\n'.join(list_tags)
+        send_tags = 'Tags: ' + ', '.join(list_tags)
 
         await ctx.send(send_tags)   
 
