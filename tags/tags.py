@@ -50,7 +50,7 @@ class TagsPlugin(commands.Cog):
             )
             return
         
-     @tags.command(name='list')
+    @tags.command(name='list')
     async def list_(self, ctx):
         '''Get a list of tags that hace already been made.'''
 
