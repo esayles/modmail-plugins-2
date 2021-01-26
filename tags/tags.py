@@ -63,7 +63,7 @@ class TagsPlugin(commands.Cog):
 
         for tag in tags:
             try:
-                list_tags.append(tag['name'])
+                list_tags.append(tag['`name`'])
             except:
                 continue
 
