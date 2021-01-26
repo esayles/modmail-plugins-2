@@ -52,7 +52,7 @@ class TagsPlugin(commands.Cog):
         
     @tags.command(name='list')
     async def list_(self, ctx):
-        '''Get a list of tags that hace already been made.'''
+        '''Get a list of tags that have already been made.'''
 
         tags = await self.db.find({}).to_list(length=None)
 
