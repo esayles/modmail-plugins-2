@@ -50,17 +50,26 @@ class TagsPlugin(commands.Cog):
             )
             return
         
-    @tags.command(name='list')
-    async def list(self, ctx: commands.Context):
-        """
-        Show list of commands
-        """ 
-        tag = await self.find_db(name=name)
+     @tags.command(name='list')
+    async def list_(self, ctx):
+        '''Get a list of tags that hace already been made.'''
 
-        if tag:
-            await ctx.send('Tags: ' + ', '.join(tag))
-        else:
-            await ctx.send('No tags saved')   
+        tags = await self.db.find({}).to_list(length=None)
+
+        if tags is None:
+            return await ctx.send(':x: | You don\'t have any tags.')
+        
+        list_tags = []
+
+        for tag in tags:
+            try:
+                list_tags.append(tag['name'])
+            except:
+                continue
+
+        send_tags = '\n'.join(list_tags)
+
+        await ctx.send(send_tags)   
 
 
 
