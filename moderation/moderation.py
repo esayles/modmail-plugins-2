@@ -18,6 +18,7 @@ class ModerationPlugin(commands.Cog):
     @checks.has_permissions(PermissionLevel.MODERATOR)
     async def logchanel(self, ctx, channel: discord.TextChannel):
         """Set Up The Log Channel For posting mod-logs
+
         Usage:
         logchannel #channel
         """
@@ -33,6 +34,7 @@ class ModerationPlugin(commands.Cog):
     async def ban(self, ctx, members: commands.Greedy[discord.Member], delete_days: typing.Optional[int] = 0, *,
                   reason: str = None):
         """Ban A Single User or a group of members
+
         Usage:
         ban @member Gave a ban
         ban @member1 @member2 @member3 Spammers
@@ -70,6 +72,7 @@ class ModerationPlugin(commands.Cog):
     @checks.has_permissions(PermissionLevel.MODERATOR)
     async def kick(self, ctx, members: commands.Greedy[discord.Member], *, reason: str = None):
         """Kick a Single member or a group of members
+
                 Usage:
                 kick @member Gave a kick
                 kick @member1 @member2 @member3 Spammers
@@ -103,29 +106,30 @@ class ModerationPlugin(commands.Cog):
                 await ctx.send("An Error Occurred, Check Logs For More Details")
                 raise e
 
-     @commands.command()
-     @checks.has_permissions(PermissionLevel.MODERATOR)
-     async def mute(self, ctx, members: commands.Greedy[discord.Member], *, reason: str = None):
-         """Mute a Single member or a group of members
-    
-                         Usage:
-                         mute @member Gave a kick
-                         mute @member1 @member2 @member3 Spammers
-                         """
-    
-         config = (await self.db.find_one({'_id': 'config'}))
-         if config is None:
-             await ctx.send("No mod-log channel configured")
-             return
-         else:
-             channel = ctx.guild.get_channel(int(config["logs"]['channel']))
-    
-          if channel:
+      @commands.command()
+      @checks.has_permissions(PermissionLevel.MODERATOR)
+      async def mute(self, ctx, members: commands.Greedy[discord.Member], *, reason: str = None):
+          """Mute a Single member or a group of members
+     
+                          Usage:
+                          mute @member Gave a kick
+                          mute @member1 @member2 @member3 Spammers
+                          """
+     
+          config = (await self.db.find_one({'_id': 'config'}))
+          if config is None:
+              await ctx.send("No mod-log channel configured")
+              return
+          else:
+              channel = ctx.guild.get_channel(int(config["logs"]['channel']))
+     
+           if channel:
 
     @commands.command()
     @checks.has_permissions(PermissionLevel.MODERATOR)
     async def warn(self, ctx: commands.Context,  member: discord.Member, *, reason: str):
         """Warn a member
+
         Usage:
         warn @member <...reason>
         """
