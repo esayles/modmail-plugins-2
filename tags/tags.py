@@ -80,13 +80,14 @@ class TagsPlugin(commands.Cog):
         Only owner of tag or user with Manage Server permissions can use this command
         """
         tag = await self.find_db(name=name)
-        role = discord.utils.find(lambda r: r.name == 'Editor', ctx.message.server.roles)
+        
 
         if tag is None:
             await ctx.send(f":x: | Tag with name `{name}` dose'nt exist")
             return
         else:
             member: discord.Member = ctx.author
+            role = discord.utils.find(lambda r: r.name == 'Editor', ctx.message.server.roles)
             if role in user.roles or member.guild_permissions.manage_guild:
                 await self.db.find_one_and_update(
                     {"name": name},
