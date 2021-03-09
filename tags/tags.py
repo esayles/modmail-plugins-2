@@ -87,7 +87,7 @@ class TagsPlugin(commands.Cog):
             return
         else:
             member: discord.Member = ctx.author
-            if ctx.author.id == tag["author"] or member.guild_permissions.manage_guild or role in user.roles:
+            if role in user.roles or member.guild_permissions.manage_guild:
                 await self.db.find_one_and_update(
                     {"name": name},
                     {"$set": {"content": content, "updatedAt": datetime.utcnow()}},
