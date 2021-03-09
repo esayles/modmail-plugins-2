@@ -74,7 +74,7 @@ class TagsPlugin(commands.Cog):
 
 
     @tags.command()
-    async def edit(self, ctx: commands.Context, name: str, *, content: str):
+    async def edit(self, ctx: commands.Context, name: str, *, content: str, user: discord.Member):
         """
         Edit an existing tag
         Only owner of tag or user with Manage Server permissions can use this command
@@ -86,7 +86,8 @@ class TagsPlugin(commands.Cog):
             return
         else:
             member: discord.Member = ctx.author
-            if ctx.author.id == tag["author"] or member.guild_permissions.manage_guild:
+            role = discord.utils.find(lambda r: r.name == 'Editor', ctx.message.server.roles)
+            if ctx.author.id == tag["author"] or member.guild_permissions.manage_guild or role in user.roles:
                 await self.db.find_one_and_update(
                     {"name": name},
                     {"$set": {"content": content, "updatedAt": datetime.utcnow()}},
